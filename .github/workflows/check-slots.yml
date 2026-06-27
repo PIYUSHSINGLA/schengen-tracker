@@ -33,6 +33,9 @@ jobs:
           pip install -r requirements.txt
           playwright install chromium --with-deps
 
+      - name: Ensure data dir exists
+        run: mkdir -p data
+
       - name: Run slot checker
         env:
           VFS_EMAIL: ${{ secrets.VFS_EMAIL }}
@@ -49,6 +52,14 @@ jobs:
 
       - name: Copy slots.json to docs/
         run: cp data/slots.json docs/slots.json
+
+      - name: Upload debug screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-screenshots
+          path: data/debug_*.png
+          if-no-files-found: ignore
 
       - name: Commit updated slot data
         run: |
