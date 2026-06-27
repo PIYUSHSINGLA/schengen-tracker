@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-27T14:00:45Z",
+  "generated_at": "2026-06-27T15:03:23Z",
   "window_days": 90,
   "countries": [
     {
@@ -10,8 +10,8 @@
       "booking_url": "https://visa.vfsglobal.com/gbr/en/irl",
       "status": "error",
       "slots": [],
-      "last_checked": "2026-06-27T14:00:45Z",
-      "error": "Page.fill: Timeout 30000ms exceeded.\nCall log:\nwaiting for locator(\"input[type=\\\"email\\\"], input[name=\\\"username\\\"], input[id*=\\\"email\\\"]\")\n"
+      "last_checked": "2026-06-27T15:03:23Z",
+      "error": "Could not find email field. Screenshot saved to data/debug_email.png"
     },
     {
       "name": "Netherlands",
@@ -21,8 +21,8 @@
       "booking_url": "https://visa.vfsglobal.com/gbr/en/nld",
       "status": "error",
       "slots": [],
-      "last_checked": "2026-06-27T14:00:45Z",
-      "error": "Page.fill: Timeout 30000ms exceeded.\nCall log:\nwaiting for locator(\"input[type=\\\"email\\\"], input[name=\\\"username\\\"], input[id*=\\\"email\\\"]\")\n"
+      "last_checked": "2026-06-27T15:03:23Z",
+      "error": "Could not find email field. Screenshot saved to data/debug_email.png"
     },
     {
       "name": "Italy",
@@ -32,8 +32,8 @@
       "booking_url": "https://visa.vfsglobal.com/gbr/en/ita",
       "status": "error",
       "slots": [],
-      "last_checked": "2026-06-27T14:00:45Z",
-      "error": "Page.fill: Timeout 30000ms exceeded.\nCall log:\nwaiting for locator(\"input[type=\\\"email\\\"], input[name=\\\"username\\\"], input[id*=\\\"email\\\"]\")\n"
+      "last_checked": "2026-06-27T15:03:23Z",
+      "error": "Could not find email field. Screenshot saved to data/debug_email.png"
     },
     {
       "name": "France",
@@ -43,8 +43,8 @@
       "booking_url": "https://fr.tlscontact.com/gb/LON/",
       "status": "error",
       "slots": [],
-      "last_checked": "2026-06-27T14:00:45Z",
-      "error": "Page.fill: Timeout 30000ms exceeded.\nCall log:\nwaiting for locator(\"input[type=\\\"email\\\"], input[name=\\\"email\\\"], input[id*=\\\"email\\\"]\")\n"
+      "last_checked": "2026-06-27T15:03:23Z",
+      "error": "Could not find email field on TLS page. Screenshot saved."
     }
   ]
 }
