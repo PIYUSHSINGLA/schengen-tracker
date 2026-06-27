@@ -1,0 +1,115 @@
+countries:
+  # VFS Global — London applicants
+  - name: Italy
+    code: ITA
+    flag: "🇮🇹"
+    portal: vfs
+    url: https://visa.vfsglobal.com/gbr/en/ita
+    visa_category: "Schengen Visa"
+    mission_country: ITA
+    centre: LON
+
+  - name: Spain
+    code: ESP
+    flag: "🇪🇸"
+    portal: vfs
+    url: https://visa.vfsglobal.com/gbr/en/esp
+    visa_category: "Schengen Visa"
+    mission_country: ESP
+    centre: LON
+
+  - name: Belgium
+    code: BEL
+    flag: "🇧🇪"
+    portal: vfs
+    url: https://visa.vfsglobal.com/gbr/en/bel
+    visa_category: "Schengen Visa"
+    mission_country: BEL
+    centre: LON
+
+  - name: Portugal
+    code: PRT
+    flag: "🇵🇹"
+    portal: vfs
+    url: https://visa.vfsglobal.com/gbr/en/prt
+    visa_category: "Schengen Visa"
+    mission_country: PRT
+    centre: LON
+
+  - name: Greece
+    code: GRC
+    flag: "🇬🇷"
+    portal: vfs
+    url: https://visa.vfsglobal.com/gbr/en/grc
+    visa_category: "Schengen Visa"
+    mission_country: GRC
+    centre: LON
+
+  - name: Czech Republic
+    code: CZE
+    flag: "🇨🇿"
+    portal: vfs
+    url: https://visa.vfsglobal.com/gbr/en/cze
+    visa_category: "Schengen Visa"
+    mission_country: CZE
+    centre: LON
+
+  - name: Croatia
+    code: HRV
+    flag: "🇭🇷"
+    portal: vfs
+    url: https://visa.vfsglobal.com/gbr/en/hrv
+    visa_category: "Schengen Visa"
+    mission_country: HRV
+    centre: LON
+
+  - name: Latvia
+    code: LVA
+    flag: "🇱🇻"
+    portal: vfs
+    url: https://visa.vfsglobal.com/gbr/en/lva
+    visa_category: "Schengen Visa"
+    mission_country: LVA
+    centre: LON
+
+  - name: Luxembourg
+    code: LUX
+    flag: "🇱🇺"
+    portal: vfs
+    url: https://visa.vfsglobal.com/gbr/en/lux
+    visa_category: "Schengen Visa"
+    mission_country: LUX
+    centre: LON
+
+  # TLScontact — London applicants
+  - name: France
+    code: FRA
+    flag: "🇫🇷"
+    portal: tls
+    url: https://fr.tlscontact.com/gb/LON/
+    tls_country: fr
+    tls_city: LON
+
+  - name: Germany
+    code: DEU
+    flag: "🇩🇪"
+    portal: tls
+    url: https://de.tlscontact.com/gb/LON/
+    tls_country: de
+    tls_city: LON
+
+  - name: Netherlands
+    code: NLD
+    flag: "🇳🇱"
+    portal: tls
+    url: https://nl.tlscontact.com/gb/LON/
+    tls_country: nl
+    tls_city: LON
+
+  - name: Switzerland
+    code: CHE
+    flag: "🇨🇭"
+    portal: tls
+    url: https://ch.tlscontact.com/gb/LON/
+    tls_country: ch
+    tls_city: LON

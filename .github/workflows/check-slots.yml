@@ -1,0 +1,59 @@
+name: Check Visa Slots
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # every 15 minutes
+  workflow_dispatch:          # allow manual trigger from GitHub UI
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write         # needed to commit slots.json
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Restore tracker DB cache
+        uses: actions/cache@v4
+        with:
+          path: data/tracker.db
+          key: tracker-db-${{ github.run_id }}
+          restore-keys: tracker-db-
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium --with-deps
+
+      - name: Run slot checker
+        env:
+          VFS_EMAIL: ${{ secrets.VFS_EMAIL }}
+          VFS_PASSWORD: ${{ secrets.VFS_PASSWORD }}
+          TLS_EMAIL: ${{ secrets.TLS_EMAIL }}
+          TLS_PASSWORD: ${{ secrets.TLS_PASSWORD }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          HEADLESS: true
+          LOG_LEVEL: INFO
+          SLOT_WINDOW_DAYS: 90
+          ALERT_COOLDOWN_HOURS: 6
+        run: python -m src.main --one-shot
+
+      - name: Copy slots.json to docs/
+        run: cp data/slots.json docs/slots.json
+
+      - name: Commit updated slot data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/slots.json docs/slots.json
+          git diff --staged --quiet || git commit -m "chore: update slot data $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+          git push

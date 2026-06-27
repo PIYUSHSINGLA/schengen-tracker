@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Schengen Visa Slot Tracker</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f2f7;
+  --card:#ffffff;
+  --border:#e2e6f0;
+  --text:#1a1d2e;
+  --muted:#6b7280;
+  --dim:#9ca3af;
+  --green:#16a34a;
+  --green-bg:#dcfce7;
+  --green-border:#86efac;
+  --amber:#d97706;
+  --amber-bg:#fef3c7;
+  --amber-border:#fcd34d;
+  --red:#dc2626;
+  --red-bg:#fee2e2;
+  --red-border:#fca5a5;
+  --blue:#2563eb;
+  --blue-bg:#dbeafe;
+  --blue-border:#93c5fd;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 12px rgba(0,0,0,.05);
+  --shadow-lg:0 4px 16px rgba(0,0,0,.12);
+}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;min-height:100vh;line-height:1.5}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+
+/* ── HEADER ── */
+header{
+  background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 50%,#312e81 100%);
+  padding:.85rem 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 12px rgba(0,0,0,.25);
+}
+.brand h1{
+  font-size:1.35rem;font-weight:800;letter-spacing:-.02em;
+  background:linear-gradient(90deg,#93c5fd,#c4b5fd,#f9a8d4);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.brand p{font-size:.72rem;color:rgba(255,255,255,.5);margin-top:1px}
+
+.header-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.refresh-info{
+  text-align:right;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+  border-radius:9px;padding:.4rem .85rem;
+}
+.refresh-info .ri-label{font-size:.65rem;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.05em}
+.refresh-info .ri-val{font-size:.8rem;color:#fff;font-weight:600;font-variant-numeric:tabular-nums}
+.check-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:.5rem 1.1rem;border-radius:9px;font-size:.8rem;font-weight:700;
+  background:#22c55e;border:none;color:#fff;
+  transition:background .15s,transform .1s;white-space:nowrap;
+  box-shadow:0 2px 8px rgba(34,197,94,.4);
+}
+.check-btn:hover{background:#16a34a;transform:translateY(-1px)}
+.check-btn:active{transform:translateY(0)}
+.check-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.check-btn svg{transition:transform .1s}
+.check-btn.spinning svg{animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── TOOLBAR ── */
+.toolbar{
+  background:#fff;border-bottom:1px solid var(--border);
+  padding:.75rem 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+}
+.toolbar-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.summary-pill{
+  font-size:.78rem;font-weight:600;padding:.35rem .85rem;border-radius:20px;
+  background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);
+}
+.filter-btn{
+  font-size:.78rem;font-weight:600;padding:.35rem .85rem;border-radius:20px;
+  background:transparent;border:1px solid var(--border);color:var(--muted);
+  transition:all .15s;
+}
+.filter-btn:hover{border-color:var(--blue-border);color:var(--blue);background:var(--blue-bg)}
+.filter-btn.active{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue)}
+.search-wrap{position:relative;min-width:220px}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--dim);pointer-events:none}
+#search{
+  width:100%;padding:.45rem .75rem .45rem 2.1rem;
+  border:1px solid var(--border);border-radius:9px;
+  font-size:.82rem;background:#fff;color:var(--text);outline:none;
+  transition:border-color .15s,box-shadow .15s;
+}
+#search:focus{border-color:var(--blue-border);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+#search::placeholder{color:var(--dim)}
+
+/* ── GRID ── */
+.grid-wrap{padding:1.25rem 1.5rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+
+/* ── COUNTRY CARD ── */
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  box-shadow:var(--shadow);overflow:hidden;
+  display:flex;flex-direction:column;
+  transition:box-shadow .2s,border-color .2s,transform .15s;
+}
+.card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.card.available{border-top:3px solid var(--green)}
+.card.none{border-top:3px solid var(--border)}
+.card.error{border-top:3px solid var(--red)}
+
+.card-head{padding:.9rem 1rem .7rem;display:flex;align-items:flex-start;gap:10px}
+.card-flag{font-size:2rem;line-height:1;flex-shrink:0}
+.card-info{flex:1;min-width:0}
+.card-name{font-size:.95rem;font-weight:700;display:flex;align-items:center;gap:6px}
+.card-name .status-icon{font-size:.85rem;flex-shrink:0}
+.card-type{font-size:.72rem;color:var(--muted);margin-top:1px}
+.portal-badge{
+  margin-left:auto;font-size:.65rem;font-weight:700;letter-spacing:.04em;
+  padding:2px 7px;border-radius:5px;flex-shrink:0;
+}
+.portal-badge.vfs{background:var(--blue-bg);color:var(--blue)}
+.portal-badge.tls{background:#ede9fe;color:#7c3aed}
+
+.card-stats{
+  padding:.3rem 1rem .6rem;
+  display:flex;align-items:center;gap:12px;
+}
+.card-stat-item{font-size:.75rem;color:var(--muted)}
+.card-stat-item strong{color:var(--text);font-weight:700}
+.sep{color:var(--border);font-size:.9rem}
+
+.date-chips{padding:0 1rem .75rem;display:flex;gap:5px;flex-wrap:wrap}
+.date-chip{
+  display:flex;flex-direction:column;align-items:center;
+  background:var(--green-bg);border:1px solid var(--green-border);
+  border-radius:8px;padding:.3rem .55rem;cursor:pointer;
+  transition:background .15s,border-color .15s;min-width:52px;
+}
+.date-chip:hover{background:#bbf7d0;border-color:#4ade80}
+.date-chip.selected{background:var(--green);border-color:var(--green)}
+.date-chip.selected .dc-date{color:#fff}
+.date-chip.selected .dc-slots{color:rgba(255,255,255,.8)}
+.dc-date{font-size:.72rem;font-weight:700;color:var(--green);white-space:nowrap}
+.dc-slots{font-size:.65rem;color:var(--green);opacity:.75}
+
+.card-actions{
+  padding:.6rem 1rem .85rem;display:flex;gap:7px;
+  border-top:1px solid var(--border);margin-top:auto;
+}
+.btn-notify{
+  flex:1;padding:.45rem;border-radius:8px;font-size:.75rem;font-weight:600;
+  border:1px solid var(--border);background:#fff;color:var(--muted);
+  transition:all .15s;
+}
+.btn-notify:hover{border-color:var(--blue-border);color:var(--blue);background:var(--blue-bg)}
+.btn-view{
+  flex:1;padding:.45rem;border-radius:8px;font-size:.75rem;font-weight:700;
+  border:1px solid var(--blue-border);background:var(--blue-bg);color:var(--blue);
+  transition:all .15s;
+}
+.btn-view:hover{background:var(--blue);color:#fff}
+
+.no-slots-label{
+  padding:.4rem 1rem .75rem;font-size:.78rem;color:var(--dim);font-style:italic;
+}
+
+/* ── MODAL OVERLAY ── */
+.modal-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(15,23,42,.55);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;padding:1rem;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{
+  background:#fff;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.2);
+  width:100%;max-width:560px;max-height:90vh;overflow-y:auto;
+  transform:translateY(20px);transition:transform .25s cubic-bezier(.34,1.56,.64,1);
+}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-head{
+  padding:1.1rem 1.25rem .9rem;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:#fff;border-radius:18px 18px 0 0;z-index:1;
+}
+.modal-title{display:flex;align-items:center;gap:10px}
+.modal-flag{font-size:1.8rem;line-height:1}
+.modal-name{font-size:1.05rem;font-weight:700}
+.modal-sub{font-size:.75rem;color:var(--muted);margin-top:1px}
+.modal-close{
+  width:30px;height:30px;border-radius:50%;border:1px solid var(--border);
+  background:#f9fafb;color:var(--muted);font-size:1rem;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .15s;
+}
+.modal-close:hover{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
+
+/* ── Modal week calendar ── */
+.modal-body{padding:1rem 1.25rem 1.25rem}
+.modal-section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.6rem}
+.week-nav{display:flex;align-items:center;gap:8px;margin-bottom:.85rem}
+.week-arr{
+  width:30px;height:30px;border-radius:8px;border:1px solid var(--border);
+  background:#f9fafb;color:var(--muted);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:1rem;transition:all .15s;flex-shrink:0;
+}
+.week-arr:hover{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border)}
+.week-days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;flex:1}
+.wd{
+  border:1.5px solid var(--border);border-radius:10px;padding:.4rem .2rem;
+  text-align:center;cursor:pointer;transition:all .15s;background:#f9fafb;
+}
+.wd:hover{border-color:var(--blue-border);background:var(--blue-bg)}
+.wd.has{border-color:var(--green-border);background:var(--green-bg)}
+.wd.sel{border-color:var(--green);background:var(--green)}
+.wd.sel .wd-n,.wd.sel .wd-d{color:#fff}
+.wd.sel .wd-s{color:rgba(255,255,255,.8)}
+.wd-n{font-size:.58rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.04em}
+.wd-d{font-size:.95rem;font-weight:700;margin:.05rem 0}
+.wd-s{font-size:.6rem;font-weight:600;color:var(--green)}
+.wd-s.empty{color:transparent}
+
+.slot-rows{margin-top:.75rem}
+.slot-row{
+  display:flex;align-items:center;gap:10px;
+  padding:.6rem .75rem;border:1px solid var(--border);border-radius:10px;
+  margin-bottom:6px;background:#f9fafb;transition:border-color .15s;
+}
+.slot-row:hover{border-color:var(--green-border);background:var(--green-bg)}
+.slot-time-lbl{font-size:.9rem;font-weight:700;font-variant-numeric:tabular-nums;min-width:45px}
+.slot-loc{font-size:.78rem;color:var(--muted);flex:1}
+.slot-count-badge{
+  font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:5px;
+  background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);
+}
+.slot-book-btn{
+  padding:.35rem .85rem;border-radius:7px;font-size:.75rem;font-weight:700;
+  background:var(--green);color:#fff;border:none;
+  cursor:pointer;transition:background .15s;white-space:nowrap;
+}
+.slot-book-btn:hover{background:#15803d}
+.slot-empty-msg{text-align:center;padding:1.5rem;color:var(--dim);font-size:.82rem}
+
+/* ── Empty / loading states ── */
+.state-msg{
+  grid-column:1/-1;background:#fff;border:1px solid var(--border);
+  border-radius:14px;padding:3rem;text-align:center;
+  box-shadow:var(--shadow);
+}
+.state-msg h3{font-size:1rem;font-weight:700;margin:.75rem 0 .4rem}
+.state-msg p{font-size:.82rem;color:var(--muted);max-width:360px;margin:0 auto;line-height:1.7}
+.state-icon{font-size:2.5rem}
+
+.skel{animation:shim 1.4s ease infinite;background:linear-gradient(90deg,#f0f2f7 25%,#e8eaf0 50%,#f0f2f7 75%);background-size:200% 100%;border-radius:6px}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:1rem;box-shadow:var(--shadow)}
+
+/* ── Toast ── */
+.toast{
+  position:fixed;bottom:1.25rem;right:1.25rem;z-index:999;
+  background:#1e293b;color:#fff;border-radius:10px;
+  padding:.65rem 1.1rem;font-size:.8rem;font-weight:600;
+  transform:translateY(60px);opacity:0;pointer-events:none;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 8px 24px rgba(0,0,0,.2);
+}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ── Footer ── */
+footer{border-top:1px solid var(--border);padding:.9rem 1.5rem;background:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+footer p{font-size:.75rem;color:var(--muted)}
+footer a{color:var(--blue)}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="brand">
+    <h1>🌍 Schengen Visa Slot Tracker</h1>
+    <p>Real-time monitoring · London applicants · VFS Global &amp; TLScontact</p>
+  </div>
+  <div class="header-right">
+    <div class="refresh-info">
+      <div class="ri-label">Last checked</div>
+      <div class="ri-val" id="last-checked-val">—</div>
+    </div>
+    <div class="refresh-info">
+      <div class="ri-label">Next check in</div>
+      <div class="ri-val" id="next-check-val">—</div>
+    </div>
+    <button class="check-btn" id="check-btn" onclick="triggerWorkflow()">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Check now
+    </button>
+  </div>
+</header>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="toolbar-left">
+    <span class="summary-pill" id="summary-pill">Loading…</span>
+    <button class="filter-btn active" id="fbtn-all"       onclick="setFilter('all')">All</button>
+    <button class="filter-btn"       id="fbtn-available"  onclick="setFilter('available')">Available only</button>
+    <button class="filter-btn"       id="fbtn-none"       onclick="setFilter('none')">No slots</button>
+  </div>
+  <div class="search-wrap">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input id="search" type="search" placeholder="Search country…" autocomplete="off"/>
+  </div>
+</div>
+
+<!-- GRID -->
+<div class="grid-wrap">
+  <div class="grid" id="grid"></div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>Powered by <a href="https://github.com" target="_blank">GitHub Actions</a> &amp; GitHub Pages · Refreshes every 15 minutes</p>
+  <p><a href="https://visa.vfsglobal.com/gbr/en/ita" target="_blank">VFS Global</a> &nbsp;·&nbsp; <a href="https://fr.tlscontact.com/gb/LON/" target="_blank">TLScontact</a></p>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <div class="modal-title">
+        <span class="modal-flag" id="m-flag">🌍</span>
+        <div>
+          <div class="modal-name" id="m-name">Country</div>
+          <div class="modal-sub" id="m-sub">VFS Global · Short-stay visa</div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section-title">Select a date</div>
+      <div class="week-nav">
+        <button class="week-arr" onclick="shiftWeek(-1)">&#8249;</button>
+        <div class="week-days" id="m-week"></div>
+        <button class="week-arr" onclick="shiftWeek(1)">&#8250;</button>
+      </div>
+      <div class="modal-section-title">Available slots</div>
+      <div class="slot-rows" id="m-slots"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Config ─────────────────────────────────────────────────────────────────
+const GITHUB_OWNER  = 'YOUR_GITHUB_USERNAME';
+const GITHUB_REPO   = 'schengen-tracker';
+const GITHUB_TOKEN  = 'YOUR_GITHUB_PAT_HERE';
+const WORKFLOW_FILE = 'check-slots.yml';
+const DATA_URL      = new URL('slots.json', window.location.href).href;
+const REFRESH_MS    = 15 * 60 * 1000;
+
+// ── State ───────────────────────────────────────────────────────────────────
+let allData    = null;
+let genAt      = null;
+let filter     = 'all';
+let query      = '';
+let nextFetch  = Date.now() + REFRESH_MS;
+let modalCtry  = null;
+let modalDate  = null;
+let weekOffset = 0;
+
+// ── Boot ────────────────────────────────────────────────────────────────────
+showSkeletons();
+fetchData();
+setInterval(fetchData, REFRESH_MS);
+setInterval(updateTimers, 1000);
+
+// ── Data ────────────────────────────────────────────────────────────────────
+async function fetchData(silent) {
+  try {
+    const r = await fetch(DATA_URL + '?_=' + Date.now());
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    if (!Array.isArray(j.countries)) throw new Error('bad data');
+    allData = j;
+    genAt   = j.generated_at ? new Date(j.generated_at) : null;
+    nextFetch = Date.now() + REFRESH_MS;
+    if (silent) toast('Slot data refreshed');
+    render();
+  } catch(e) {
+    if (!allData) renderError(e.message);
+  }
+}
+
+// ── Render ──────────────────────────────────────────────────────────────────
+function render() {
+  updateTimers();
+  renderSummary();
+  renderGrid();
+}
+
+function updateTimers() {
+  // Last checked
+  const lc = document.getElementById('last-checked-val');
+  if (genAt) {
+    const s = Math.floor((Date.now() - genAt) / 1000);
+    lc.textContent = s < 60 ? `${s}s ago` : s < 3600 ? `${Math.floor(s/60)}m ago` : fmtTime(genAt);
+  } else { lc.textContent = 'Pending'; }
+
+  // Next check countdown
+  const nc = document.getElementById('next-check-val');
+  const rem = Math.max(0, Math.round((nextFetch - Date.now()) / 1000));
+  const m = Math.floor(rem / 60), s = rem % 60;
+  nc.textContent = `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function renderSummary() {
+  if (!allData) return;
+  const avail = allData.countries.filter(c => c.status === 'available').length;
+  const total = allData.countries.length;
+  const el = document.getElementById('summary-pill');
+  el.textContent = avail > 0
+    ? `${avail} of ${total} countries have slots`
+    : `${total} countries tracked · No slots found`;
+  el.style.background = avail > 0 ? '' : '#f3f4f6';
+  el.style.color = avail > 0 ? '' : '#6b7280';
+  el.style.borderColor = avail > 0 ? '' : '#e5e7eb';
+}
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  if (!allData) return;
+
+  if (!allData.generated_at && allData.countries.length === 0) {
+    grid.innerHTML = `<div class="state-msg">
+      <div class="state-icon">⏳</div>
+      <h3>Waiting for first check</h3>
+      <p>Push this repo to GitHub — it checks automatically every 15 minutes. Hit <strong>Check now</strong> above to trigger it immediately.</p>
+    </div>`;
+    return;
+  }
+
+  let countries = [...allData.countries];
+  if (query) countries = countries.filter(c => c.name.toLowerCase().includes(query));
+  if (filter !== 'all') countries = countries.filter(c => c.status === filter);
+
+  // Sort: available first → none → error, then alphabetical within groups
+  countries.sort((a, b) => {
+    const r = {available:0,none:1,error:2};
+    const d = (r[a.status]??1) - (r[b.status]??1);
+    return d !== 0 ? d : a.name.localeCompare(b.name);
+  });
+
+  if (!countries.length) {
+    grid.innerHTML = `<div class="state-msg"><div class="state-icon">🔍</div><h3>No results</h3><p>No countries match your filter.</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = countries.map(buildCard).join('');
+}
+
+function buildCard(c) {
+  const totalSlots = c.slots?.reduce((n,s) => n+s.count, 0) || 0;
+  const nearest    = c.slots?.[0]?.date;
+  const topDates   = uniqueDates(c.slots || []).slice(0, 3);
+
+  const statusIcon = c.status === 'available' ? '✅'
+    : c.status === 'error' ? '⚠️' : '⭕';
+
+  const chipsHtml = c.status === 'available' && topDates.length
+    ? `<div class="date-chips">${topDates.map(({date, count}) =>
+        `<div class="date-chip" onclick="openModal(event,'${esc(c.name)}','${date}')">
+          <span class="dc-date">${fmtShort(date)}</span>
+          <span class="dc-slots">${count} slot${count!==1?'s':''}</span>
+        </div>`).join('')}</div>`
+    : c.status === 'error'
+      ? `<div class="no-slots-label">⚠️ ${esc(c.error||'Scraper error')}</div>`
+      : `<div class="no-slots-label">No appointments in next ${allData?.window_days||90} days</div>`;
+
+  const actions = c.status === 'available'
+    ? `<div class="card-actions">
+        <button class="btn-notify" onclick="toast('Notifications coming soon!')">Notify Me</button>
+        <button class="btn-view" onclick="openModal(event,'${esc(c.name)}','${nearest||''}')">View More Dates →</button>
+       </div>`
+    : `<div class="card-actions">
+        <button class="btn-notify" onclick="toast('Notifications coming soon!')">Notify Me</button>
+        <button class="btn-view" style="opacity:.4;cursor:not-allowed" disabled>No Slots Available</button>
+       </div>`;
+
+  return `<div class="card ${esc(c.status)}">
+    <div class="card-head">
+      <div class="card-flag">${c.flag||'🌐'}</div>
+      <div class="card-info">
+        <div class="card-name">
+          <span>${esc(c.name)}</span>
+          <span class="status-icon">${statusIcon}</span>
+        </div>
+        <div class="card-type">Short-stay visa</div>
+      </div>
+      <span class="portal-badge ${c.portal}">${c.portal==='vfs'?'VFS':'TLS'}</span>
+    </div>
+    ${c.status === 'available' ? `
+    <div class="card-stats">
+      <div class="card-stat-item"><strong>${totalSlots}</strong> slots</div>
+      <span class="sep">·</span>
+      <div class="card-stat-item">Nearest: <strong>${nearest ? fmtShort(nearest) : '—'}</strong></div>
+    </div>` : ''}
+    ${chipsHtml}
+    ${actions}
+  </div>`;
+}
+
+// ── Modal ────────────────────────────────────────────────────────────────────
+function openModal(e, name, date) {
+  e && e.stopPropagation();
+  if (!allData) return;
+  modalCtry = allData.countries.find(c => c.name === name);
+  if (!modalCtry) return;
+
+  document.getElementById('m-flag').textContent = modalCtry.flag || '🌐';
+  document.getElementById('m-name').textContent = modalCtry.name;
+  document.getElementById('m-sub').textContent  = (modalCtry.portal==='vfs'?'VFS Global':'TLScontact') + ' · Short-stay visa · London';
+
+  // Set weekOffset so the selected date is visible
+  modalDate  = date || modalCtry.slots?.[0]?.date || null;
+  weekOffset = 0;
+  if (modalDate) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const sd    = new Date(modalDate+'T12:00:00');
+    const diff  = Math.floor((sd-today)/86400000);
+    if (diff > 0) weekOffset = Math.floor(diff/7);
+  }
+
+  renderModalWeek();
+  renderModalSlots();
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay') && e.type!=='click') return;
+  if (e && e.currentTarget === document.getElementById('modal-overlay') && e.target !== e.currentTarget) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('modal-overlay').addEventListener('click', function(e){
+  if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+
+function maxWeekOffset() {
+  // today + 90 days → which week offset is that?
+  return Math.ceil((allData?.window_days || 90) / 7);
+}
+function shiftWeek(d) {
+  const next = weekOffset + d;
+  if (next < 0 || next > maxWeekOffset()) return;
+  weekOffset = next;
+  renderModalWeek();
+  renderModalSlots();
+}
+
+function renderModalWeek() {
+  const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const today = new Date(); today.setHours(0,0,0,0);
+  const mon = new Date(today);
+  const dow = today.getDay();
+  mon.setDate(today.getDate() - (dow===0?6:dow-1) + weekOffset*7);
+
+  const smap = {};
+  modalCtry?.slots?.forEach(s => { smap[s.date] = (smap[s.date]||0)+s.count; });
+
+  let html = '';
+  for (let i=0;i<7;i++){
+    const d   = new Date(mon); d.setDate(mon.getDate()+i);
+    const key = d.toISOString().slice(0,10);
+    const cnt = smap[key]||0;
+    const sel = key===modalDate;
+    const cls = sel?'wd sel':cnt?'wd has':'wd';
+    html += `<div class="${cls}" onclick="selectModalDate('${key}')">
+      <div class="wd-n">${DAYS[i]}</div>
+      <div class="wd-d">${d.getDate()}</div>
+      <div class="wd-s${cnt?'':' empty'}">${cnt?cnt+'s':'-'}</div>
+    </div>`;
+  }
+  document.getElementById('m-week').innerHTML = html;
+  // Disable arrows at boundaries
+  document.querySelectorAll('.week-arr')[0].disabled = weekOffset <= 0;
+  document.querySelectorAll('.week-arr')[1].disabled = weekOffset >= maxWeekOffset();
+  document.querySelectorAll('.week-arr').forEach(b => b.style.opacity = b.disabled ? '0.3' : '');
+}
+
+function selectModalDate(date) {
+  modalDate = date;
+  renderModalWeek();
+  renderModalSlots();
+}
+
+function renderModalSlots() {
+  const el = document.getElementById('m-slots');
+  if (!modalCtry || !modalDate) {
+    el.innerHTML = '<div class="slot-empty-msg">Select a date above to see slots</div>';
+    return;
+  }
+  const daySlots = modalCtry.slots?.filter(s => s.date===modalDate) || [];
+  if (!daySlots.length) {
+    el.innerHTML = `<div class="slot-empty-msg">No slots on ${fmtDate(modalDate)} — pick another date</div>`;
+    return;
+  }
+  el.innerHTML = daySlots.map(s => `
+    <div class="slot-row">
+      <span class="slot-time-lbl">${s.time||'—'}</span>
+      <span class="slot-loc">VFS London Centre · 25 min</span>
+      <span class="slot-count-badge">${s.count} slot${s.count!==1?'s':''}</span>
+      <a class="slot-book-btn" href="${esc(modalCtry.booking_url)}" target="_blank" rel="noopener">Book Now →</a>
+    </div>`).join('');
+}
+
+// ── Filters & Search ─────────────────────────────────────────────────────────
+function setFilter(f) {
+  filter = f;
+  ['all','available','none'].forEach(id => {
+    document.getElementById('fbtn-'+id).className = 'filter-btn' + (f===id?' active':'');
+  });
+  renderGrid();
+}
+
+document.getElementById('search').addEventListener('input', e => {
+  query = e.target.value.toLowerCase().trim();
+  renderGrid();
+});
+
+// ── GitHub trigger ────────────────────────────────────────────────────────────
+async function triggerWorkflow() {
+  if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_GITHUB_PAT_HERE') {
+    toast('Set GITHUB_TOKEN in index.html first'); return;
+  }
+  const btn = document.getElementById('check-btn');
+  btn.disabled = true; btn.classList.add('spinning');
+  try {
+    const r = await fetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/${WORKFLOW_FILE}/dispatches`,
+      { method:'POST', headers:{'Authorization':'Bearer '+GITHUB_TOKEN,'Accept':'application/vnd.github+json','Content-Type':'application/json'}, body:JSON.stringify({ref:'main'}) }
+    );
+    if (r.status===204) { toast('Check triggered — data updates in ~2 min'); setTimeout(()=>fetchData(true),120000); }
+    else { const j=await r.json().catch(()=>({})); toast('Failed: '+(j.message||r.status)); }
+  } catch(e) { toast('Network error'); }
+  finally { setTimeout(()=>{btn.disabled=false;btn.classList.remove('spinning')},30000); }
+}
+
+// ── Skeleton ─────────────────────────────────────────────────────────────────
+function showSkeletons() {
+  document.getElementById('grid').innerHTML = Array(8).fill(0).map(()=>`
+    <div class="skel-card">
+      <div style="display:flex;gap:10px;margin-bottom:12px">
+        <div class="skel" style="width:44px;height:44px;border-radius:10px"></div>
+        <div style="flex:1"><div class="skel" style="width:60%;height:14px;margin-bottom:7px"></div><div class="skel" style="width:40%;height:11px"></div></div>
+      </div>
+      <div class="skel" style="width:80%;height:11px;margin-bottom:10px"></div>
+      <div style="display:flex;gap:6px"><div class="skel" style="width:60px;height:38px;border-radius:8px"></div><div class="skel" style="width:60px;height:38px;border-radius:8px"></div><div class="skel" style="width:60px;height:38px;border-radius:8px"></div></div>
+    </div>`).join('');
+}
+
+function renderError(msg) {
+  document.getElementById('grid').innerHTML = `<div class="state-msg"><div class="state-icon">⚠️</div><h3>Couldn't load data</h3><p>${esc(msg)}</p></div>`;
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function uniqueDates(slots) {
+  const seen = {};
+  slots.forEach(s => { seen[s.date] = (seen[s.date]||0)+s.count; });
+  return Object.entries(seen).map(([date,count])=>({date,count})).sort((a,b)=>a.date<b.date?-1:1);
+}
+function fmtShort(d) {
+  if (!d) return '—';
+  const [y,m,day] = d.split('-').map(Number);
+  return new Date(y,m-1,day).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  const [y,m,day] = d.split('-').map(Number);
+  return new Date(y,m-1,day).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+}
+function fmtTime(dt) {
+  return dt ? dt.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '—';
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>
