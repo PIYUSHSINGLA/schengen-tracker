@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-06T11:43:00Z",
+  "generated_at": "2026-08-06T13:22:46Z",
   "window_days": 90,
   "countries": [
     {
@@ -10,7 +10,7 @@
       "booking_url": "https://visa.vfsglobal.com/gbr/en/irl",
       "status": "none",
       "slots": [],
-      "last_checked": "2026-08-06T11:43:00Z",
+      "last_checked": "2026-08-06T13:22:46Z",
       "error": null
     },
     {
@@ -21,7 +21,7 @@
       "booking_url": "https://visa.vfsglobal.com/gbr/en/nld",
       "status": "none",
       "slots": [],
-      "last_checked": "2026-08-06T11:43:00Z",
+      "last_checked": "2026-08-06T13:22:46Z",
       "error": null
     },
     {
@@ -32,7 +32,7 @@
       "booking_url": "https://visa.vfsglobal.com/gbr/en/ita",
       "status": "none",
       "slots": [],
-      "last_checked": "2026-08-06T11:43:00Z",
+      "last_checked": "2026-08-06T13:22:46Z",
       "error": null
     },
     {
@@ -43,7 +43,7 @@
       "booking_url": "https://fr.tlscontact.com/gb/LON/",
       "status": "error",
       "slots": [],
-      "last_checked": "2026-08-06T11:43:00Z",
+      "last_checked": "2026-08-06T13:22:46Z",
       "error": "Could not find email field on TLS page. Screenshot saved."
     }
   ]
