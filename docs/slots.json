@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-02T21:42:35Z",
+  "generated_at": "2026-09-02T23:35:59Z",
   "window_days": 90,
   "countries": [
     {
@@ -8,10 +8,10 @@
       "flag": "🇮🇪",
       "portal": "vfs",
       "booking_url": "https://visa.vfsglobal.com/gbr/en/irl",
-      "status": "error",
+      "status": "none",
       "slots": [],
-      "last_checked": "2026-09-02T21:42:35Z",
-      "error": "Could not find email field. Screenshot saved to data/debug_email.png"
+      "last_checked": "2026-09-02T23:35:59Z",
+      "error": null
     },
     {
       "name": "Netherlands",
@@ -21,7 +21,7 @@
       "booking_url": "https://visa.vfsglobal.com/gbr/en/nld",
       "status": "none",
       "slots": [],
-      "last_checked": "2026-09-02T21:42:35Z",
+      "last_checked": "2026-09-02T23:35:59Z",
       "error": null
     },
     {
@@ -32,7 +32,7 @@
       "booking_url": "https://visa.vfsglobal.com/gbr/en/ita",
       "status": "none",
       "slots": [],
-      "last_checked": "2026-09-02T21:42:35Z",
+      "last_checked": "2026-09-02T23:35:59Z",
       "error": null
     },
     {
@@ -43,7 +43,7 @@
       "booking_url": "https://fr.tlscontact.com/gb/LON/",
       "status": "error",
       "slots": [],
-      "last_checked": "2026-09-02T21:42:35Z",
+      "last_checked": "2026-09-02T23:35:59Z",
       "error": "Could not find email field on TLS page. Screenshot saved."
     }
   ]
